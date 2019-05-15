@@ -157,17 +157,15 @@ install_git() {
     ${INS} install gcc perl-ExtUtils-MakeMaker wget -y
     cd ~
     wget https://github.com/git/git/archive/v$lastest_git_version.tar.gz -O git-$lastest_git_version.tar.gz
-    tar -zxvf git-$lastest_git_version.tar.gz
+    tar -zxvf git-$lastest_git_version.tar.gz > /dev/null
     cd git-$lastest_git_version
-    make prefix=/usr/local/git all
-    make prefix=/usr/local/git install
+    make prefix=/usr/local/git all > /dev/null
+    make prefix=/usr/local/git install > /dev/null
     echo "export PATH=$PATH:/usr/local/git/bin" >> /etc/bashrc
     source /etc/bashrc
-    git_version=`git --version`
-    if [[ $git_version = "git version $lastest_git_version" ]];then
-        ${INS} remove git -y
-        source /etc/bashrc
-    fi
+    yum remove git -y
+    source /etc/bashrc
+
 }
 
 # 安装mysql
@@ -186,6 +184,7 @@ install_mysql() {
     rpm -ivh ./mysql-community-client-$lastest_mysql_version-1.el7.x86_64.rpm
     rpm -ivh ./mysql-community-embedded-compat-$lastest_mysql_version-1.el7.x86_64.rpm
     rpm -ivh ./mysql-community-server-$lastest_mysql_version-1.el7.x86_64.rpm
+    sleep 1
 }
 
 install_ssl() {
@@ -201,7 +200,7 @@ install_ssl() {
 }
 
 domain_check(){
-    stty erase '^H' && read -p "请输入你的域名信息(eg:www.baidu.com):" domain
+    read -p "请输入你的域名信息(eg:www.baidu.com):" domain
     domain_ip=`ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'`
     echo -e "${OK} ${GreenBG} 正在获取 公网ip 信息，请耐心等待 ${Font}"
     local_ip=`curl -4 ip.sb`
@@ -331,6 +330,7 @@ clean() {
     cd ~
     rm -f mysql*
     rm -rf git*
+    judge "清理完成"
 }
 
 main() {
