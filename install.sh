@@ -3,8 +3,8 @@
 #	System Request: Centos 7+
 #	Author:	fcheng
 #   Email: fchengjin@126.com
-#	Dscription: 一键环境搭建，nginx，git，mysql，node，yarn， 更换yum源，acme自动申请ssl证书
-#	Version: 0.0.1
+#	Dscription: 前端一键环境搭建，nginx，git，mysql，node，yarn， 更换yum源，acme自动申请ssl证书
+#	Version: 0.0.2
 #====================================================
 
 #fonts color
@@ -147,6 +147,8 @@ install_nodejs() {
 install_yarn(){
     ${INS} install yarn -y
     is_cmd_exists yarn
+    yarn config set registry "https://registry.npm.taobao.org"
+    judge "更改yarn源为淘宝源"
 }
 
 #安装git
