@@ -154,8 +154,8 @@ install_git() {
     ${INS} install curl-devel expat-devel gettext-devel openssl-devel zlib-devel -y
     ${INS} install gcc perl-ExtUtils-MakeMaker wget -y
     cd ~
-    wget https://github.com/git/git/archive/v$lastest_git_version.tar.gz
-    tar -zxvf v$lastest_git_version.tar.gz
+    wget https://github.com/git/git/archive/v$lastest_git_version.tar.gz -O git-$lastest_git_version.tar.gz
+    tar -zxvf git-$lastest_git_version.tar.gz
     cd git-$lastest_git_version
     make prefix=/usr/local/git all
     make prefix=/usr/local/git install
@@ -322,6 +322,13 @@ show_information(){
     echo -e "${Green} git版本为:${Font} ${git_version:12}"
     echo -e "${Green} mysql版本为:${Font} $mysql_version"
     echo -e "${red} mysql 默认账号密码为:${Font} ${mysql_default_pwd}"
+}
+
+clean() {
+    # 执行安装之后的清理工作
+    cd ~
+    rm -f mysql*
+    rm -rf git*
 }
 
 main() {
