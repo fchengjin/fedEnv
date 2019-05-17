@@ -162,8 +162,8 @@ install_git() {
     make prefix=/usr/local/git all > /dev/null
     make prefix=/usr/local/git install > /dev/null
     echo "export PATH=$PATH:/usr/local/git/bin" >> /etc/bashrc
-    source /etc/bashrc
     yum remove git -y
+    sleep 1
     source /etc/bashrc
 
 }
@@ -335,6 +335,7 @@ clean() {
 
 main() {
     is_root
+    domain_check
     check_system
     install_nginx
     install_nodejs
@@ -343,7 +344,6 @@ main() {
     install_mysql
 
     # 安装ssl 证书
-    domain_check
     nginx_conf_add
     port_exist_check 80
     install_ssl
