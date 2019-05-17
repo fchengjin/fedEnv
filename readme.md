@@ -13,3 +13,12 @@
 - centos 7.0 以上系统
 - 将域名解析到本机ip
 - 需要使用root权限执行该脚本
+
+## 开始使用
+
+```bash
+curl -o- https://raw.githubusercontent.com/fchengjin/fedEnv/master/install.sh | bash
+```
+
+## TODO
+- [ ] 选择是否需要acme.sh 证书申请
