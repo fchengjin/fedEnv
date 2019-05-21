@@ -4,7 +4,7 @@
 #	Author:	fcheng
 #   Email: fchengjin@126.com
 #	Dscription: 前端一键环境搭建，nginx，git，mysql，node，yarn， 更换yum源，acme自动申请ssl证书
-#	Version: 0.0.2
+#	Version: 0.0.3
 #====================================================
 
 #fonts color
@@ -29,11 +29,38 @@ lastest_mysql_version="8.0.15"
 
 INS="yum"
 
+softewares=(nginx yarn git mysql acme.sh)
+
 source /etc/os-release
 
 #从VERSION中提取发行版系统的英文名称，为了在debian/ubuntu下添加相对应的Nginx apt源
 VERSION=`echo ${VERSION} | awk -F "[()]" '{print $2}'`
 
+
+# 选择需要安装的软件
+choose() {
+    echo -e "${Green}请选择需要安装的软件: 多选用,分割，默认全部安装，acme.sh 需要搭配 nginx，示例:2,3 ${Font}"
+    selected=""
+    #${#array[@]}获取数组长度用于循环
+    local softwares_length=${#softewares[@]}
+    for(( i=0;i<$softwares_length;i++)) do
+        echo "$[$i+1]) ${softewares[i]}";
+    done;
+
+    read -p "请选择(示例：1,2；不填默认全部)：" user_input
+    str_arr=(${user_input//,/ })
+    echo "数组元素个数为:"
+    [[  ${#str_arr[*]} == 0 ]] && str_arr=(1 2 3 4 5)
+    for(( i=0;i<$softwares_length;i++)) do
+        tmp=`if echo "${str_arr[@]}" | grep -w $[$i+1] &>/dev/null; then  
+                echo 1
+            fi`
+        if [ "$tmp" == "1" ];then
+            selected="$selected ${softewares[i]}"
+        fi
+    done
+    echo -e "${Green}你已选择安装${Font}${selected}"
+}
 
 is_root(){
     if [ `id -u` == 0 ]
@@ -95,7 +122,7 @@ judge(){
         sleep 1
     else
         echo -e "${Error} ${RedBG} $1 失败${Font}"
-        exit 1
+        return
     fi
 }
 
@@ -130,7 +157,7 @@ install_nginx(){
         sleep 2
     else
         echo -e "${Error} ${RedBG} nginx 安装失败 ${Font}"
-        exit 5
+        return
     fi
     if [[ ! -f /etc/nginx/nginx.conf.bak ]];then
         cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
@@ -196,7 +223,8 @@ install_ssl() {
     judge "安装 SSL 证书生成脚本依赖"
 
     curl  https://get.acme.sh | sh
-    judge "安装 SSL 证书生成脚本"  
+    judge "安装 SSL 证书生成脚本" 
+    acme
 }
 
 domain_check(){
@@ -237,7 +265,6 @@ acme(){
         fi
     else
         echo -e "${Error} ${RedBG} SSL 证书生成失败 ${Font}"
-        exit 1
     fi
 }
 
@@ -304,11 +331,9 @@ start_process_systemd(){
     judge "mysqld 启动"
     # 抓取mysql默认生成的随机密码
     mysql_default_pwd=`grep -E -i 'root.*?' /var/log/mysqld.log -o`
-
 }
 
 show_information(){
-    clear
     nginx_version_full=`rpm -qa | grep nginx`
     nginx_version=`echo $nginx_version_full | grep -P '(\d+\.){2}\d+' -o`
     git_version=`git --version`
@@ -316,13 +341,15 @@ show_information(){
     node_version=`node -v`
     mysql_version_full=`mysql --version`
     mysql_version=`$mysql_version_full | grep -P '(\d+\.){2}\d+' -o`
+    
+    clear
     echo -e "${ok} ${Green} 一键环境配置安装成功"
-    echo -e "${Green} nginx版本为:${Font} ${nginx_version}"
+    [[ "$selected" =~ "nginx" ]] && echo -e "${Green} nginx版本为:${Font} ${nginx_version}"
     echo -e "${Green} nodejs版本为:${Font} ${node_version:1}"
-    echo -e "${Green} yarn版本为:${Font} $yarn_version"
-    echo -e "${Green} git版本为:${Font} ${git_version:12}"
-    echo -e "${Green} mysql版本为:${Font} $mysql_version"
-    echo -e "${red} mysql 默认账号密码为:${Font} ${mysql_default_pwd}"
+    [[ "$selected" =~ "yarn" ]] && echo -e "${Green} yarn版本为:${Font} $yarn_version"
+    [[ "$selected" =~ "git" ]] && echo -e "${Green} git版本为:${Font} ${git_version:12}"
+    [[ "$selected" =~ "mysql" ]] &&  echo -e "${Green} mysql版本为:${Font} $mysql_version"
+    [[ "$selected" =~ "mysql" ]] && echo -e "${red} mysql 默认账号密码为:${Font} ${mysql_default_pwd}"
 }
 
 clean() {
@@ -330,25 +357,27 @@ clean() {
     cd ~
     rm -f mysql*
     rm -rf git*
-    judge "清理完成"
+    source /etc/bashrc
+    judge "清理安装文件"
 }
 
 main() {
-    is_root
-    domain_check
+    # is_root
+    choose
+    [[ "$selected" =~ "acme.sh" ]] && domain_check
     check_system
-    install_nginx
+    [[ "$selected" =~ "nginx" ]] && install_nginx
     install_nodejs
-    install_yarn
-    install_git
-    install_mysql
+    [[ "$selected" =~ "yarn" ]] && install_yarn
+    [[ "$selected" =~ "git" ]] && install_git
+    [[ "$selected" =~ "mysql" ]] && install_mysql
 
-    # 安装ssl 证书
-    nginx_conf_add
+    # # 安装ssl 证书
+    [[ "$selected" =~ "nginx" ]] && [[ "$selected" =~ "acme.sh" ]] && nginx_conf_add
     port_exist_check 80
-    install_ssl
-    acme
+    [[ "$selected" =~ "nginx" ]] && [[ "$selected" =~ "acme.sh" ]] && install_ssl
     start_process_systemd
+    clean
     show_information
 }
 main
