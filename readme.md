@@ -21,4 +21,4 @@ curl -o- https://raw.githubusercontent.com/fchengjin/fedEnv/master/install.sh | 
 ```
 
 ## TODO
-- [*] 用户自己选择安装[#1](https://github.com/fchengjin/fedEnv/issues/1)
+- [x] 用户自己选择安装[#1](https://github.com/fchengjin/fedEnv/issues/1)
