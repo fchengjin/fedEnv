@@ -29,7 +29,7 @@ lastest_mysql_version="8.0.15"
 
 INS="yum"
 
-softewares=(nginx yarn git mysql acme.sh)
+softewares=(更换aliyun源 nginx yarn git mysql acme.sh)
 
 source /etc/os-release
 
@@ -47,9 +47,8 @@ choose() {
         echo "$[$i+1]) ${softewares[i]}";
     done;
 
-    read -p "请选择(示例：1,2；不填默认全部)：" user_input
+    read -p "请选择(示例：2,3；不填默认全部)：" user_input
     str_arr=(${user_input//,/ })
-    echo "数组元素个数为:"
     [[  ${#str_arr[*]} == 0 ]] && str_arr=(1 2 3 4 5)
     for(( i=0;i<$softwares_length;i++)) do
         tmp=`if echo "${str_arr[@]}" | grep -w $[$i+1] &>/dev/null; then  
@@ -79,7 +78,15 @@ check_system(){
       echo -e "${OK} ${GreenBG} SElinux 设置中，请耐心等待，不要进行其他操作${Font} "
       setsebool -P httpd_can_network_connect 1
       echo -e "${OK} ${GreenBG} SElinux 设置完成 ${Font} "
-      # 更改yum源为阿里云源
+
+    else
+      echo -e "${Error} ${RedBG} 当前系统为 ${ID} ${VERSION_ID} 不在支持的系统列表内，需要centos 7.0以上版本，安装中断 ${Font} "
+      exit 1
+    fi
+}
+
+set_yum_origin() {
+# 更改yum源为阿里云源
           mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.${current_time}.bak
           echo -e "${OK} ${GreenBG} yum 初始配置备份完成 ${Font}"
           wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
@@ -87,20 +94,24 @@ check_system(){
           yum makecache
           echo -e "${OK} ${GreenBG} yum 设置为阿里云源 ${Font}"
           sleep 1
+}
 
-      ## Centos 也可以通过添加 epel 仓库来安装，目前不做改动
-      # 添加nginx源
-      cat>/etc/yum.repos.d/nginx.repo<<EOF
+set_nginx_origin() {
+    # 添加nginx源
+    cat>/etc/yum.repos.d/nginx.repo<<EOF
 [nginx]
 name=nginx repo
 baseurl=http://nginx.org/packages/mainline/centos/7/\$basearch/
 gpgcheck=0
 enabled=1
 EOF
-      echo -e "${OK} ${GreenBG} Nginx 源 安装完成 ${Font}" 
+    echo -e "${OK} ${GreenBG} Nginx 源 安装完成 ${Font}" 
 
-      # 添加yarn源
-      cat>/etc/yum.repos.d/yarn.repo<<EOF
+}
+
+set_yarn_origin() {
+    # 添加yarn源
+    cat>/etc/yum.repos.d/yarn.repo<<EOF
 [yarn]
 name=Yarn Repository
 baseurl=https://dl.yarnpkg.com/rpm/
@@ -109,11 +120,6 @@ gpgcheck=1
 gpgkey=https://dl.yarnpkg.com/rpm/pubkey.gpg
 EOF
       echo -e "${OK} ${GreenBG} Yarn 源 安装完成 ${Font}" 
-
-    else
-      echo -e "${Error} ${RedBG} 当前系统为 ${ID} ${VERSION_ID} 不在支持的系统列表内，需要centos 7.0以上版本，安装中断 ${Font} "
-      exit 1
-    fi
 }
 
 judge(){
@@ -345,11 +351,9 @@ show_information(){
     clear
     echo -e "${ok} ${Green} 一键环境配置安装成功"
     [[ "$selected" =~ "nginx" ]] && echo -e "${Green} nginx版本为:${Font} ${nginx_version}"
-    echo -e "${Green} nodejs版本为:${Font} ${node_version:1}"
-    [[ "$selected" =~ "yarn" ]] && echo -e "${Green} yarn版本为:${Font} $yarn_version"
+    [[ "$selected" =~ "yarn" ]] && echo -e "${Green} nodejs版本为:${Font} ${node_version:1}" && echo -e "${Green} yarn版本为:${Font} $yarn_version"
     [[ "$selected" =~ "git" ]] && echo -e "${Green} git版本为:${Font} ${git_version:12}"
-    [[ "$selected" =~ "mysql" ]] &&  echo -e "${Green} mysql版本为:${Font} $mysql_version"
-    [[ "$selected" =~ "mysql" ]] && echo -e "${red} mysql 默认账号密码为:${Font} ${mysql_default_pwd}"
+    [[ "$selected" =~ "mysql" ]] &&  echo -e "${Green} mysql版本为:${Font} $mysql_version" && echo -e "${red} mysql 默认账号密码为:${Font} ${mysql_default_pwd}"
 }
 
 clean() {
@@ -366,9 +370,9 @@ main() {
     choose
     [[ "$selected" =~ "acme.sh" ]] && domain_check
     check_system
-    [[ "$selected" =~ "nginx" ]] && install_nginx
-    install_nodejs
-    [[ "$selected" =~ "yarn" ]] && install_yarn
+    [[ "$selected" =~ "更换aliyun源" ]] && set_yum_origin
+    [[ "$selected" =~ "nginx" ]] && set_nginx_origin && install_nginx
+    [[ "$selected" =~ "yarn" ]] && install_nodejs && set_yarn_origin && install_yarn
     [[ "$selected" =~ "git" ]] && install_git
     [[ "$selected" =~ "mysql" ]] && install_mysql
 
