@@ -20,5 +20,8 @@
 bash <(curl -L -s https://raw.githubusercontent.com/fchengjin/fedEnv/master/install.sh)| tee fed.log
 ```
 
+## 注意
+如果要单独使用acme.sh,请确保安装了nginx
+
 ## TODO
 - [x] 用户自己选择安装[#1](https://github.com/fchengjin/fedEnv/issues/1)

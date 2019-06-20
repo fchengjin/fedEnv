@@ -377,9 +377,9 @@ main() {
     [[ "$selected" =~ "mysql" ]] && install_mysql
 
     # # 安装ssl 证书
-    [[ "$selected" =~ "nginx" ]] && [[ "$selected" =~ "acme.sh" ]] && nginx_conf_add
+    [[ "$selected" =~ "acme.sh" ]] && nginx_conf_add
     port_exist_check 80
-    [[ "$selected" =~ "nginx" ]] && [[ "$selected" =~ "acme.sh" ]] && install_ssl
+    [[ "$selected" =~ "acme.sh" ]] && install_ssl
     start_process_systemd
     clean
     show_information
