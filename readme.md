@@ -17,7 +17,7 @@
 ## 开始使用
 
 ```bash
-bash <(curl -L -s https://raw.githubusercontent.com/fchengjin/fedEnv/master/install.sh) | tee fed.log
+bash <(curl -L -s https://raw.githubusercontent.com/fchengjin/fedEnv/master/install.sh)| tee fed.log
 ```
 
 ## TODO
