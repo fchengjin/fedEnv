@@ -349,7 +349,7 @@ show_information(){
     mysql_version=`$mysql_version_full | grep -P '(\d+\.){2}\d+' -o`
     
     clear
-    echo -e "${ok} ${Green} 一键环境配置安装成功"
+    echo -e "${ok} ${Green} 一键环境配置安装成功${Font}"
     [[ "$selected" =~ "nginx" ]] && echo -e "${Green} nginx版本为:${Font} ${nginx_version}"
     [[ "$selected" =~ "yarn" ]] && echo -e "${Green} nodejs版本为:${Font} ${node_version:1}" && echo -e "${Green} yarn版本为:${Font} $yarn_version"
     [[ "$selected" =~ "git" ]] && echo -e "${Green} git版本为:${Font} ${git_version:12}"
