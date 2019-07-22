@@ -260,6 +260,8 @@ domain_check(){
 }
 
 acme(){
+    ## standalone 模式需要安装socat
+    yum install socat -y
     ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --force
     if [[ $? -eq 0 ]];then
         echo -e "${OK} ${GreenBG} SSL 证书生成成功 ${Font}"
