@@ -288,7 +288,7 @@ modify_nginx(){
 
 nginx_conf_add(){
     mkdir $nginx_cert_dir
-    rm -f  ${nginx_conf_dir}/$domain.conf
+    mv ${nginx_conf_dir}/$domain.conf  ${nginx_conf_dir}/$domain.conf.${current_time}.bak
     touch ${nginx_conf_dir}/$domain.conf
     cat>${nginx_conf_dir}/$domain.conf<<EOF
     server {
