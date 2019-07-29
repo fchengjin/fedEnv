@@ -332,13 +332,15 @@ start_process_systemd(){
     systemctl start nginx
     judge "Nginx 启动"
 
-    # mysql 添加为开机启动
-    systemctl enable mysqld
-    judge "Mysqld 添加为开机启动"
-    systemctl start mysqld
-    judge "mysqld 启动"
-    # 抓取mysql默认生成的随机密码
-    mysql_default_pwd=`grep -E -i 'root.*?' /var/log/mysqld.log -o`
+    if [[ "$selected" =~ "mysql" ]];then
+        # mysql 添加为开机启动
+        systemctl enable mysqld
+        judge "Mysqld 添加为开机启动"
+        systemctl start mysqld
+        judge "mysqld 启动"
+        # 抓取mysql默认生成的随机密码
+        mysql_default_pwd=`grep -E -i 'root.*?' /var/log/mysqld.log -o`
+    fi
 }
 
 show_information(){
